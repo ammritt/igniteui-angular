@@ -115,6 +115,7 @@ import { HierarchicalGridAddRowSampleComponent } from './hierarchical-grid-add-r
 import { AnimationsSampleComponent } from './styleguide/animations/animations.sample';
 import { GridFormattingComponent } from './grid-formatting/grid-formatting.component';
 import { MainComponent } from './grid-finjs/main.component';
+import { TreeSampleComponent } from './tree/tree.sample';
 
 const appRoutes = [
     {
@@ -482,6 +483,9 @@ const appRoutes = [
     {
         path: 'gridFinJS',
         component: MainComponent
+    },{
+        path: 'tree',
+        component: TreeSampleComponent
     },
     {
         path: 'treeGrid',

@@ -1,0 +1,43 @@
+<igx-expansion-panel>
+    <igx-expansion-panel-header class="igx-node__header" [iconPosition]="'left'" (dblclick)="setEditMode()" (onInteraction)="toggle($event)">
+        <igx-expansion-panel-icon>
+            <ng-container *ngTemplateOutlet="expandIndicatorTemplate, context: templateContext">
+            </ng-container>
+            <ng-container *ngTemplateOutlet="selectMarkerTemplate, context: templateContext">
+            </ng-container>
+        </igx-expansion-panel-icon>
+        <igx-expansion-panel-title>
+            <ng-container *ngTemplateOutlet="headerTemplate, context: templateContext">
+            </ng-container>
+        </igx-expansion-panel-title>
+
+    </igx-expansion-panel-header>
+    <igx-expansion-panel-body>
+        <igx-tree-node *ngFor="let item of data[childKey]" [id]="id + '-' + item[valueKey]" [data]="item"
+            [depth]="depth + 1" [parentPath]="fullPath" [nodeTemplate]="nodeTemplate"
+            [nodeEditTemplate]="nodeEditTemplate" [selectMarker]="selectMarker" [expandIndicator]="expandIndicator">
+        </igx-tree-node>
+    </igx-expansion-panel-body>
+</igx-expansion-panel>
+
+
+<ng-template #defaultIndicator let-item>
+    <igx-icon>
+        {{ expanded ? "expand_less" : "expand_more" }}
+    </igx-icon>
+</ng-template>
+
+<ng-template #defaultSelect let-item>
+    <igx-checkbox [checked]="selected" [readonly]="true">
+    </igx-checkbox>
+</ng-template>
+
+<ng-template #defaultTemplate let-item>
+    {{ item.data[textKey] }} FAF
+</ng-template>
+
+<ng-template #defaultEdit let-item>
+    <igx-input-group>
+        <input igxInput [(ngModel)]="item.data[textKey]" >
+    </igx-input-group>
+</ng-template>

@@ -1,0 +1,13 @@
+<div class="tree__root">
+    <igx-tree-node *ngFor="let item of dataSource"
+        [id]="id + '-' + item[valueKey]"
+        [data]="item"
+        [depth]="0"
+        [parentPath]="[]"
+        [nodeTemplate]="nodeTemplate"
+        [nodeEditTemplate]="nodeEditTemplate"
+        [selectMarker]="selectMarker"
+        [expandIndicator]="expandIndicator"
+    >
+    </igx-tree-node>
+</div>

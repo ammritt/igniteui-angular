@@ -1,0 +1,9 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+}
+
+.igx-node__header {
+    user-select: none;
+}
