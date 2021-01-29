@@ -3,7 +3,7 @@ import { IBaseCancelableBrowserEventArgs, IBaseCancelableEventArgs, IBaseEventAr
 
 // Component interfaces
 
-export interface ITreeComponent {
+export interface IgxTree {
     id: string,
     nodeTemplate: TemplateRef<any>,
     nodeEditTemplate: TemplateRef<any>,
@@ -16,29 +16,37 @@ export interface ITreeComponent {
     nodeEditing: EventEmitter<ITreeNodeEditingEvent>
     nodeExpanding: EventEmitter<ITreeNodeTogglingEventArgs>,
     nodeExpanded: EventEmitter<ITreeNodeToggledEventArgs>,
-    expandNode(id: string): void,
-    collapseNode(id: string): void,
-    toggleNode(id: string): void,
-    selectNode(id: string): void,
+    expandNode(node: IgxTreeNode): void,
+    collapseNode(node: IgxTreeNode): void,
+    toggleNode(node: IgxTreeNode): void,
+    selectNode(node: IgxTreeNode): void,
     updateNodeText(id: string, value: string): void,
-    updateNode(id: string, value: any): void,
-    deleteNode(nodePath: string[]): void,
-    addNode(data: any, parentPath?: string[]): void
+    updateNode(node: IgxTreeNode, value: any): void,
+    deleteNode(node: IgxTreeNode): void,
+    addNode(data: any, parentNode?: IgxTreeNode): void
 }
 
 // Item interfaces
-export interface ITreeNode {
+export interface IgxTreeNode {
     id: string,
-    depth: number,
     fullPath: string[],
-    children?: ITreeNode[]
+    parentId: string | null,
+    expanded: boolean | null,
+    selected: boolean,
+    data: any,
+    level: number,
+    children: any[] | null,
+    valueKey: string,
+    textKey: string,
+    childKey: string,
+    index: string
 }
 
 export interface ITreeRoot {
 }
 
-export interface ITreeBranch extends ITreeNode {
-    children: ITreeNode[],
+export interface ITreeBranch extends IgxTreeNode {
+    children: IgxTreeNode[],
     childKey: string
 }
 
@@ -73,4 +81,5 @@ export enum IGX_TREE_SELECTION_TYPE {
 }
 
 // Token
-export const IGX_TREE_COMPONENT = new InjectionToken<ITreeComponent>('IgxComboComponentToken');
+export const IGX_TREE_COMPONENT = new InjectionToken<IgxTree>('IgxTreeToken');
+export const IGX_TREE_NODE_COMPONENT = new InjectionToken<IgxTreeNode>('IgxTreeNodeToken');

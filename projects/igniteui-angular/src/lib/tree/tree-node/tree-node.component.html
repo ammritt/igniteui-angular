@@ -1,5 +1,5 @@
 <igx-expansion-panel>
-    <igx-expansion-panel-header class="igx-node__header" [iconPosition]="'left'" (dblclick)="setEditMode()" (onInteraction)="toggle($event)">
+    <igx-expansion-panel-header class="igx-node__header" [iconPosition]="'left'" (dblclick)="setEditMode()" (onInteraction)="toggle()">
         <igx-expansion-panel-icon>
             <ng-container *ngTemplateOutlet="expandIndicatorTemplate, context: templateContext">
             </ng-container>
@@ -14,7 +14,7 @@
     </igx-expansion-panel-header>
     <igx-expansion-panel-body>
         <igx-tree-node *ngFor="let item of data[childKey]" [id]="id + '-' + item[valueKey]" [data]="item"
-            [depth]="depth + 1" [parentPath]="fullPath" [nodeTemplate]="nodeTemplate"
+            [level]="level + 1" [parentPath]="fullPath" [parentId]="id" [nodeTemplate]="nodeTemplate"
             [nodeEditTemplate]="nodeEditTemplate" [selectMarker]="selectMarker" [expandIndicator]="expandIndicator">
         </igx-tree-node>
     </igx-expansion-panel-body>
@@ -33,7 +33,7 @@
 </ng-template>
 
 <ng-template #defaultTemplate let-item>
-    {{ item.data[textKey] }} FAF
+    {{ item.data[textKey] }}
 </ng-template>
 
 <ng-template #defaultEdit let-item>

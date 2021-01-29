@@ -1,6 +1,6 @@
 <p>IgxTree</p>
 <igx-tree [dataSource]="data" [valueKey]="'ID'" [textKey]="'CompanyName'" childKey="ChildCompanies">
     <ng-template igxTreeNode let-item>
-        {{ item.data['CompanyName'] }} <igx-icon (click)="tree.deleteNode(item.fullPath)">delete</igx-icon>
+        {{ item.data['CompanyName'] }} <igx-icon (click)="tree.deleteNode(item)">delete</igx-icon>
     </ng-template>
 </igx-tree>

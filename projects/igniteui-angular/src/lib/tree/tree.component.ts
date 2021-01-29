@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, QueryList, ViewChildren, Input, Output, EventEmitter, ContentChild, Directive, ElementRef, NgModule, ViewChild, TemplateRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { Component, QueryList, ViewChildren, Input, Output, EventEmitter, ContentChild, Directive, ElementRef, NgModule, TemplateRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IgxCheckboxModule } from '../checkbox/checkbox.component';
 import { IgxSelectionAPIService } from '../core/selection';
 import { IgxExpansionPanelModule } from '../expansion-panel/public_api';
 import { IgxIconModule } from '../icon/public_api';
 import { IgxInputGroupModule } from '../input-group/public_api';
-import { IGX_TREE_COMPONENT, IGX_TREE_SELECTION_TYPE, ITreeComponent, ITreeNodeEditedEvent, ITreeNodeEditingEvent, ITreeNodeToggledEventArgs, ITreeNodeTogglingEventArgs, ITreeNodeSelectionEvent, ITreeRoot, ITreeNode } from './common';
+import { IGX_TREE_COMPONENT, IGX_TREE_SELECTION_TYPE, IgxTree, ITreeNodeEditedEvent, ITreeNodeEditingEvent, ITreeNodeToggledEventArgs, ITreeNodeTogglingEventArgs, ITreeNodeSelectionEvent, ITreeRoot, IgxTreeNode } from './common';
 import { IgxTreeNodeComponent } from './tree-node/tree-node.component';
 import { IgxTreeService } from './tree.service';
 
@@ -53,7 +53,7 @@ export class IgxTreeExpandIndicatorDirective {
         { provide: IGX_TREE_COMPONENT, useExisting: IgxTreeComponent}
     ]
 })
-export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, AfterViewInit {
+export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewInit {
     public id = `tree-${init_id++}`;
 
     constructor(private selectionService: IgxSelectionAPIService, private treeService: IgxTreeService) {}
@@ -109,12 +109,12 @@ export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, Afte
     @ViewChildren(IgxTreeNodeComponent)
     public nodes: QueryList<IgxTreeNodeComponent>
 
-    public addNode(data: any, parentPath?: string[]): void {
-        if (parentPath === null || parentPath === undefined) {
+    public addNode(data: any, parentNode?: IgxTreeNode): void {
+        if (parentNode === null || parentNode === undefined) {
             this.dataSource.push(data);
             return;
         }
-        var targetNode = this.findNode(parentPath, this.dataSource);
+        var targetNode = this.findDataEntry(parentNode.fullPath, this.dataSource);
         if (targetNode === null) {
             throw new Error("Parent not with specified path not found.")
         }
@@ -124,12 +124,13 @@ export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, Afte
         targetNode[this.childKey].push(data);
     }
 
-    public deleteNode(nodePath: string[]): void {
+    public deleteNode(node: IgxTreeNode): void {
+        const nodePath = node.fullPath;
         if (nodePath === null || nodePath === undefined)  {
             return;
         }
-        var targetNode = this.findNode(nodePath, this.dataSource);
-        var parentNode = nodePath.length === 1 ? this.dataSource : this.findNode(nodePath.slice(0, nodePath.length - 1), this.dataSource)[this.childKey];
+        var targetNode = this.findDataEntry(nodePath, this.dataSource);
+        var parentNode = nodePath.length === 1 ? this.dataSource : this.findDataEntry(nodePath.slice(0, nodePath.length - 1), this.dataSource)[this.childKey];
         var targetIndex = parentNode.findIndex(e => e[this.valueKey] === targetNode[this.valueKey]);
         (parentNode as any[]).splice(targetIndex, 1);
     }
@@ -138,15 +139,16 @@ export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, Afte
 
     public updateNodeText(nodePath: any, text: any): void {}
 
-    public selectNode(nodeId: string): void {
-        this.selectionService.add_item(this.id, nodeId);
+    public selectNode(node: IgxTreeNode): void {
+        this.selectionService.add_item(this.id, node.id);
     }
 
     public isNodeSelected(nodeId: string): boolean {
         return this.selectionService.get(this.id).has(nodeId);
     }
 
-    public expandNode(nodeId: string): void {
+    public expandNode(node: IgxTreeNode): void {
+        const nodeId = node.id;
         if (this.treeService.isExpanded(nodeId)) {
             return;
         }
@@ -166,7 +168,8 @@ export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, Afte
         }
     }
 
-    public collapseNode(nodeId: string): void {
+    public collapseNode(node: IgxTreeNode): void {
+        const nodeId = node.id;
         if (!this.treeService.isExpanded(nodeId)) {
             return;
         }
@@ -186,21 +189,26 @@ export class IgxTreeComponent implements ITreeRoot, ITreeComponent, OnInit, Afte
         }
     }
 
-    public toggleNode(nodeId: string): void {
+    public toggleNode(node: IgxTreeNode): void {
+        const nodeId = node.id;
         if (this.treeService.isExpanded(nodeId)) {
-            this.collapseNode(nodeId);
+            this.collapseNode(node);
         } else {
-            this.expandNode(nodeId);
+            this.expandNode(node);
         }
     }
 
-    private findNode(nodePath: string[], data: { [key: string] : any }): any {
+    private findDataEntry(nodePath: string[], data: { [key: string] : any }): any {
         if (nodePath.length === 1) {
             return data.find(e => e[this.valueKey] === nodePath[0]);
         } else {
             var parentData = data.find(e => e[this.valueKey] === nodePath[0]);
-            return this.findNode(nodePath.slice(-1 * (nodePath.length - 1)), parentData[this.childKey])
+            return this.findDataEntry(nodePath.slice(-1 * (nodePath.length - 1)), parentData[this.childKey])
         }
+    }
+
+    public findNode(nodePath: string[]): IgxTreeNode {
+        return this.treeService.findNode(nodePath);
     }
 
     ngOnInit() {
