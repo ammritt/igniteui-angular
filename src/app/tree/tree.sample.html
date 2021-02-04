@@ -1,6 +1,14 @@
 <p>IgxTree</p>
-<igx-tree [dataSource]="data" [valueKey]="'ID'" [textKey]="'CompanyName'" childKey="ChildCompanies">
-    <ng-template igxTreeNode let-item>
-        {{ item.data['CompanyName'] }} <igx-icon (click)="tree.deleteNode(item)">delete</igx-icon>
-    </ng-template>
+<igx-tree (nodeExpanded)="handleExpanded($event)">
+    <igx-tree-node *ngFor="let node of data" [data]="node">
+        {{ node.CompanyName }}
+        <igx-tree-node *ngFor="let child of node.ChildCompanies" [data]="child">
+            {{ child.CompanyName }}
+            <igx-tree-node *ngFor="let leafchild of child.ChildCompanies" [data]="leafchild">
+                {{ leafchild.CompanyName }}
+            </igx-tree-node>
+        </igx-tree-node>
+    </igx-tree-node>
 </igx-tree>
+
+

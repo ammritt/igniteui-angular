@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, QueryList, ViewChildren, Input, Output, EventEmitter, ContentChild, Directive, ElementRef, NgModule, TemplateRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { Component, QueryList, ViewChildren, Input, Output, EventEmitter, ContentChild, Directive, ElementRef, NgModule, TemplateRef, OnInit, AfterViewInit, HostListener, ContentChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IgxCheckboxModule } from '../checkbox/checkbox.component';
 import { IgxSelectionAPIService } from '../core/selection';
 import { IgxExpansionPanelModule } from '../expansion-panel/public_api';
 import { IgxIconModule } from '../icon/public_api';
 import { IgxInputGroupModule } from '../input-group/public_api';
-import { IGX_TREE_COMPONENT, IGX_TREE_SELECTION_TYPE, IgxTree, ITreeNodeEditedEvent, ITreeNodeEditingEvent, ITreeNodeToggledEventArgs, ITreeNodeTogglingEventArgs, ITreeNodeSelectionEvent, ITreeRoot, IgxTreeNode } from './common';
+import { IGX_TREE_COMPONENT, IGX_TREE_SELECTION_TYPE, IgxTree, ITreeNodeEditedEvent, ITreeNodeEditingEvent, ITreeNodeToggledEventArgs, ITreeNodeTogglingEventArgs, ITreeNodeSelectionEvent, IgxTreeNode } from './common';
 import { IgxTreeNodeComponent } from './tree-node/tree-node.component';
 import { IgxTreeService } from './tree.service';
 
@@ -53,25 +53,13 @@ export class IgxTreeExpandIndicatorDirective {
         { provide: IGX_TREE_COMPONENT, useExisting: IgxTreeComponent}
     ]
 })
-export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewInit {
+export class IgxTreeComponent implements IgxTree, OnInit, AfterViewInit {
     public id = `tree-${init_id++}`;
 
     constructor(private selectionService: IgxSelectionAPIService, private treeService: IgxTreeService) {}
 
     @Input()
-    public dataSource: any[];
-
-    @Input()
-    public valueKey: string;
-
-    @Input()
-    public textKey: string;
-
-    @Input()
-    public childKey: string;
-
-    @Input()
-    public selectionMode: IGX_TREE_SELECTION_TYPE = IGX_TREE_SELECTION_TYPE.BiState;
+    public selection: IGX_TREE_SELECTION_TYPE = IGX_TREE_SELECTION_TYPE.BiState;
 
     @Output()
     public nodeSelection = new EventEmitter<ITreeNodeSelectionEvent>()
@@ -106,55 +94,25 @@ export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewIn
     @ContentChild(IgxTreeExpandIndicatorDirective, { read: TemplateRef })
     public expandIndicator: TemplateRef<any>;
 
-    @ViewChildren(IgxTreeNodeComponent)
+    @ContentChildren(IgxTreeNodeComponent)
     public nodes: QueryList<IgxTreeNodeComponent>
 
-    public addNode(data: any, parentNode?: IgxTreeNode): void {
-        if (parentNode === null || parentNode === undefined) {
-            this.dataSource.push(data);
-            return;
-        }
-        var targetNode = this.findDataEntry(parentNode.fullPath, this.dataSource);
-        if (targetNode === null) {
-            throw new Error("Parent not with specified path not found.")
-        }
-        if (!targetNode[this.childKey]) {
-            targetNode[this.childKey] = [];
-        }
-        targetNode[this.childKey].push(data);
-    }
-
-    public deleteNode(node: IgxTreeNode): void {
-        const nodePath = node.fullPath;
-        if (nodePath === null || nodePath === undefined)  {
-            return;
-        }
-        var targetNode = this.findDataEntry(nodePath, this.dataSource);
-        var parentNode = nodePath.length === 1 ? this.dataSource : this.findDataEntry(nodePath.slice(0, nodePath.length - 1), this.dataSource)[this.childKey];
-        var targetIndex = parentNode.findIndex(e => e[this.valueKey] === targetNode[this.valueKey]);
-        (parentNode as any[]).splice(targetIndex, 1);
-    }
-
-    public updateNode(nodePath: any, data: any): void {}
-
-    public updateNodeText(nodePath: any, text: any): void {}
-
-    public selectNode(node: IgxTreeNode): void {
+    public selectNode(node: IgxTreeNodeComponent): void {
         this.selectionService.add_item(this.id, node.id);
     }
 
-    public isNodeSelected(nodeId: string): boolean {
-        return this.selectionService.get(this.id).has(nodeId);
+    public isNodeSelected(node: IgxTreeNodeComponent): boolean {
+        return this.selectionService.get(this.id).has(node.id);
     }
 
-    public expandNode(node: IgxTreeNode): void {
+    public expandNode(node: IgxTreeNodeComponent): void {
         const nodeId = node.id;
         if (this.treeService.isExpanded(nodeId)) {
             return;
         }
         const args: ITreeNodeTogglingEventArgs = {
             owner: this,
-            nodeId,
+            node,
             cancel: false
 
         }
@@ -163,19 +121,19 @@ export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewIn
             this.treeService.expand(nodeId);
             this.nodeExpanded.emit({
                 owner: this,
-                nodeId
+                node
             });
         }
     }
 
-    public collapseNode(node: IgxTreeNode): void {
+    public collapseNode(node: IgxTreeNodeComponent): void {
         const nodeId = node.id;
         if (!this.treeService.isExpanded(nodeId)) {
             return;
         }
         const args: ITreeNodeTogglingEventArgs = {
             owner: this,
-            nodeId,
+            node,
             cancel: false
 
         }
@@ -184,12 +142,14 @@ export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewIn
             this.treeService.collapse(nodeId);
             this.nodeCollapsed.emit({
                 owner: this,
-                nodeId
+                node
             });
         }
     }
 
-    public toggleNode(node: IgxTreeNode): void {
+
+
+    public toggleNode(node: IgxTreeNodeComponent): void {
         const nodeId = node.id;
         if (this.treeService.isExpanded(nodeId)) {
             this.collapseNode(node);
@@ -198,17 +158,13 @@ export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewIn
         }
     }
 
-    private findDataEntry(nodePath: string[], data: { [key: string] : any }): any {
-        if (nodePath.length === 1) {
-            return data.find(e => e[this.valueKey] === nodePath[0]);
-        } else {
-            var parentData = data.find(e => e[this.valueKey] === nodePath[0]);
-            return this.findDataEntry(nodePath.slice(-1 * (nodePath.length - 1)), parentData[this.childKey])
-        }
+    private comparer = (node: IgxTreeNodeComponent, data: any) => {
+        return node.data === data;
     }
 
-    public findNode(nodePath: string[]): IgxTreeNode {
-        return this.treeService.findNode(nodePath);
+    public findNode(data: any, comparer?: (node: IgxTreeNodeComponent, data: any) => boolean): IgxTreeNode {
+        const compareFunc = comparer || this.comparer;
+        return this.nodes.find(e => compareFunc(e, data));
     }
 
     ngOnInit() {
@@ -216,6 +172,10 @@ export class IgxTreeComponent implements ITreeRoot, IgxTree, OnInit, AfterViewIn
     }
     ngAfterViewInit() {
 
+    }
+
+    ngOnDestroy() {
+        this.selectionService.clear(this.id);
     }
 }
 

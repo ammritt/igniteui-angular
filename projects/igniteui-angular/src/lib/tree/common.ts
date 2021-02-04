@@ -1,76 +1,56 @@
-import { EventEmitter, InjectionToken, TemplateRef } from '@angular/core';
-import { IBaseCancelableBrowserEventArgs, IBaseCancelableEventArgs, IBaseEventArgs } from '../core/utils';
+import { EventEmitter, InjectionToken, QueryList, TemplateRef } from '@angular/core';
+import { IBaseCancelableBrowserEventArgs, IBaseEventArgs } from '../core/utils';
 
 // Component interfaces
 
 export interface IgxTree {
     id: string,
+    selection: IGX_TREE_SELECTION_TYPE;
     nodeTemplate: TemplateRef<any>,
     nodeEditTemplate: TemplateRef<any>,
     selectMarker: TemplateRef<any>,
     expandIndicator: TemplateRef<any>,
-    valueKey: string,
-    textKey: string,
-    childKey: string,
-    nodeEdited: EventEmitter<ITreeNodeEditedEvent>,
-    nodeEditing: EventEmitter<ITreeNodeEditingEvent>
     nodeExpanding: EventEmitter<ITreeNodeTogglingEventArgs>,
     nodeExpanded: EventEmitter<ITreeNodeToggledEventArgs>,
+    nodeCollapsing: EventEmitter<ITreeNodeTogglingEventArgs>,
+    nodeCollapsed: EventEmitter<ITreeNodeToggledEventArgs>
     expandNode(node: IgxTreeNode): void,
     collapseNode(node: IgxTreeNode): void,
     toggleNode(node: IgxTreeNode): void,
     selectNode(node: IgxTreeNode): void,
-    updateNodeText(id: string, value: string): void,
-    updateNode(node: IgxTreeNode, value: any): void,
-    deleteNode(node: IgxTreeNode): void,
-    addNode(data: any, parentNode?: IgxTreeNode): void
 }
 
 // Item interfaces
 export interface IgxTreeNode {
-    id: string,
-    fullPath: string[],
-    parentId: string | null,
+    parentNode?: IgxTreeNode | null,
     expanded: boolean | null,
-    selected: boolean,
+    selected: boolean | null,
     data: any,
-    level: number,
-    children: any[] | null,
-    valueKey: string,
-    textKey: string,
-    childKey: string,
+    children: QueryList<IgxTreeNode> | null,
     index: string
-}
-
-export interface ITreeRoot {
-}
-
-export interface ITreeBranch extends IgxTreeNode {
-    children: IgxTreeNode[],
-    childKey: string
 }
 
 // Events
 export interface ITreeNodeSelectionEvent extends IBaseCancelableBrowserEventArgs {
-    nodeId: string;
+    node: IgxTreeNode;
 }
 
 export interface ITreeNodeEditingEvent extends IBaseCancelableBrowserEventArgs {
-    nodeId: string;
+    node: IgxTreeNode;
     value: string;
 }
 
 export interface ITreeNodeEditedEvent extends IBaseEventArgs {
-    nodeId: string;
+    node: IgxTreeNode;
     value: any;
 }
 
 export interface ITreeNodeTogglingEventArgs extends IBaseEventArgs, IBaseCancelableBrowserEventArgs {
-    nodeId: string;
+    node: IgxTreeNode;
 }
 
 export interface ITreeNodeToggledEventArgs extends IBaseEventArgs {
-    nodeId: string;
+    node: IgxTreeNode;
 }
 
 // Enums

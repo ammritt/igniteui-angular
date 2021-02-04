@@ -1,14 +1,3 @@
 <div class="tree__root">
-    <igx-tree-node *ngFor="let item of dataSource"
-        [id]="item[valueKey]"
-        [data]="item"
-        [level]="0"
-        [parentPath]="[]"
-        [parentId]="null"
-        [nodeTemplate]="nodeTemplate"
-        [nodeEditTemplate]="nodeEditTemplate"
-        [selectMarker]="selectMarker"
-        [expandIndicator]="expandIndicator"
-    >
-    </igx-tree-node>
+    <ng-content select="igx-tree-node, igx-tree-nested-node"></ng-content>
 </div>

@@ -1,28 +1,27 @@
 <igx-expansion-panel>
-    <igx-expansion-panel-header class="igx-node__header" [iconPosition]="'left'" (dblclick)="setEditMode()" (onInteraction)="toggle()">
+    <igx-expansion-panel-header class="igx-node__header" [iconPosition]="'left'">
         <igx-expansion-panel-icon>
-            <ng-container *ngTemplateOutlet="expandIndicatorTemplate, context: templateContext">
-            </ng-container>
-            <ng-container *ngTemplateOutlet="selectMarkerTemplate, context: templateContext">
-            </ng-container>
+            <div class="igx-node__expansion-indicator" (click)="toggle($event)">
+                <ng-container *ngTemplateOutlet="expandIndicatorTemplate, context: templateContext">
+                </ng-container>
+            </div>
+            <div class="igx-node__select-indicator" (click)="select($event)">
+                <ng-container *ngTemplateOutlet="selectMarkerTemplate, context: templateContext">
+                </ng-container>
+            </div>
         </igx-expansion-panel-icon>
         <igx-expansion-panel-title>
-            <ng-container *ngTemplateOutlet="headerTemplate, context: templateContext">
-            </ng-container>
+            <ng-content></ng-content>
         </igx-expansion-panel-title>
-
     </igx-expansion-panel-header>
     <igx-expansion-panel-body>
-        <igx-tree-node *ngFor="let item of data[childKey]" [id]="id + '-' + item[valueKey]" [data]="item"
-            [level]="level + 1" [parentPath]="fullPath" [parentId]="id" [nodeTemplate]="nodeTemplate"
-            [nodeEditTemplate]="nodeEditTemplate" [selectMarker]="selectMarker" [expandIndicator]="expandIndicator">
-        </igx-tree-node>
+        <ng-content select="igx-tree-node"></ng-content>
     </igx-expansion-panel-body>
 </igx-expansion-panel>
 
 
 <ng-template #defaultIndicator let-item>
-    <igx-icon>
+    <igx-icon [ngClass]="{ hidden: this.children?.length == 0 }">
         {{ expanded ? "expand_less" : "expand_more" }}
     </igx-icon>
 </ng-template>
@@ -30,14 +29,4 @@
 <ng-template #defaultSelect let-item>
     <igx-checkbox [checked]="selected" [readonly]="true">
     </igx-checkbox>
-</ng-template>
-
-<ng-template #defaultTemplate let-item>
-    {{ item.data[textKey] }}
-</ng-template>
-
-<ng-template #defaultEdit let-item>
-    <igx-input-group>
-        <input igxInput [(ngModel)]="item.data[textKey]" >
-    </igx-input-group>
 </ng-template>
